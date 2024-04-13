@@ -1,0 +1,180 @@
+openapi: 3.0.3
+info:
+  title: test app backend
+  description:  test app backend
+  version: 0.1.0
+
+servers:
+  - url: http://localhost:3000
+    description: default API url
+
+paths:
+  /books:
+    get:
+      tags:
+        - books
+      summary: get all books
+      description: get all books info
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: JSON array of all the books
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/GetBooksSchema'
+        '401':
+          description: Authorization information is missing or invalid.
+    post:
+      tags:
+        - books
+      summary: create custom book
+      description: create custom book
+      requestBody:
+        required: true
+        description: A JSON object containing book information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBookSchema'
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Book created succesfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateBookSchema'
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+
+  /books/{bookUUID}:
+    put:
+      tags:
+        - books
+      summary: update of specified book
+      description: update of specified book
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: bookUUID
+          description: UID of updating book
+          schema:
+            type: string
+            format: uuid
+          required: true
+      requestBody:
+        required: true
+        description: A JSON object containing book updates information
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateBookSchema'
+
+      responses:
+        '200':
+          description: Book updated succesfully
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+    delete:
+      tags:
+        - books
+      summary: delete of specified book
+      description: delete of specified book
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: bookUUID
+          description: UID of deleting book
+          schema:
+            type: string
+            format: uuid
+          required: true
+
+      responses:
+        '200':
+          description: Book deleted succesfully
+
+        '400':
+          description: Bad request
+        '401':
+          description: Authorization information is missing or invalid.
+
+  /auth/login:
+    get:
+      tags:
+        - auth
+      summary: login
+      description: login
+      responses:
+        '200':
+          description: Succesfull login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string  
+
+                    
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
+  schemas:
+    GetBooksSchema:
+      type: array
+      items: 
+        $ref: '#/components/schemas/BookSchema'
+
+    CreateBookSchema:
+      required:
+        - title
+        - description
+        - genre
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        genre:
+          type: string
+    UpdateBookSchema:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        genre:
+          type: string
+    BookSchema:
+      required:
+        - id
+        - title
+        - description
+        - genre
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        title:
+          type: string
+        description:
+          type: string
+        genre:
+          type: string
